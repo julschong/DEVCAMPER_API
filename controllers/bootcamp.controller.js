@@ -4,17 +4,28 @@ import Bootcamp from '../models/Bootcamp.js'
 // @route   GET /api/v1/bootcamps
 // @access  Public
 
-export const getAll = (_req, res, _next) => {
-    res.status(200).json({ success: true, message: `Get all bootcamps` })
+export const getAll = async (_req, res, _next) => {
+    const bootcamps = await Bootcamp.find({})
+    res.status(200).json({
+        success: true,
+        count: bootcamps.length,
+        data: bootcamps
+    })
 }
 
 // @desc    Get single bootcamp
 // @route   GET /api/v1/bootcamps/:id
 // @access  Public
-export const getOne = (req, res, _next) => {
+export const getOne = async (req, res, _next) => {
+    const bootcamp = await Bootcamp.findById(req.params.id)
+
+    if (!bootcamp) {
+        return res.status(400).json({ success: false })
+    }
+
     res.status(200).json({
         success: true,
-        message: `Get bootcamp id: ${req.params.id}`
+        data: bootcamp
     })
 }
 
@@ -29,19 +40,34 @@ export const createOne = async (req, res, _next) => {
 // @desc    Update single bootcamp
 // @route   PUT /api/v1/bootcamp/:id
 // @access  Private
-export const updateOne = (req, res, _next) => {
+export const updateOne = async (req, res, _next) => {
+    const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+        runValidators: true
+    })
+
+    if (!bootcamp) {
+        return res.status(400).json({ success: false })
+    }
+
     res.status(200).json({
         success: true,
-        message: `Update bootcamp id: ${req.params.id}`
+        data: bootcamp
     })
 }
 
 // @desc    Delete single bootcamp
 // @route   DELETE /api/v1/bootcamps/:id
 // @access  Private
-export const deleteOne = (req, res, _next) => {
+export const deleteOne = async (req, res, _next) => {
+    const deletedBootcamp = await Bootcamp.findByIdAndDelete(req.params.id)
+    console.log(deletedBootcamp)
+    if (!deletedBootcamp) {
+        return res.status(400).json({ success: false })
+    }
+
     res.status(200).json({
         success: true,
-        message: `Delete bootcamp id: ${req.params.id}`
+        data: deletedBootcamp
     })
 }
