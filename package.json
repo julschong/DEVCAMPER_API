@@ -16,7 +16,9 @@
     "cross-env": "^7.0.3",
     "dotenv": "^8.5.1",
     "express": "^4.17.1",
-    "mongoose": "^5.12.7"
+    "mongoose": "^5.12.7",
+    "node-geocoder": "^3.27.0",
+    "slugify": "^1.5.2"
   },
   "devDependencies": {
     "morgan": "^1.10.0",

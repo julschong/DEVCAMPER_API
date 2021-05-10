@@ -1,6 +1,7 @@
 import Bootcamp from '../models/Bootcamp.js'
 import ErrorResponse from '../utils/errorResponse.js'
 import asyncHandler from '../middleware/async.js'
+import geocoder from '../utils/geocoder'
 
 // @desc    Get all bootcamps
 // @route   GET /api/v1/bootcamps
@@ -77,4 +78,13 @@ export const deleteOne = asyncHandler(async (req, res, _next) => {
         success: true,
         data: deletedBootcamp
     })
+})
+
+// @desc    Get bootcamps within a radius
+// @route   GET /api/v1/bootcamps/radius/:zipcode/:distance
+// @access  Public
+export const getBootcampsInRadius = asyncHandler(async (req, res, _next) => {
+    const { zipcode, distance } = req.params
+
+    // Get lat/lng from geocoder
 })

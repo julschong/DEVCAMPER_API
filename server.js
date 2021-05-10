@@ -1,7 +1,8 @@
+import dotenv from 'dotenv'
+dotenv.config({ path: './config/.env' })
+
 import colors from 'colors'
 import express from 'express'
-import dotenv from 'dotenv'
-dotenv.config({ path: './config/config.env' })
 
 import morgan from 'morgan'
 import bootcampRoute from './routes/bootcamps.route.js'
