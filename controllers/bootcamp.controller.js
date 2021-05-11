@@ -1,14 +1,51 @@
 import Bootcamp from '../models/Bootcamp.js'
 import ErrorResponse from '../utils/errorResponse.js'
 import asyncHandler from '../middleware/async.js'
-import geocoder from '../utils/geocoder'
+import geocoder from '../utils/geocoder.js'
 
 // @desc    Get all bootcamps
 // @route   GET /api/v1/bootcamps
 // @access  Public
 
-export const getAll = asyncHandler(async (_req, res, _next) => {
-    const bootcamps = await Bootcamp.find({})
+export const getAll = asyncHandler(async (req, res, _next) => {
+    let query
+
+    // Coppy req.query to manipulate
+    const reqQuery = { ...req.query }
+
+    // Fields to exclude
+    const removeFields = ['select', 'sort']
+
+    // Loop over removeFields to remove field from reqQuery
+    removeFields.forEach((param) => delete reqQuery[param])
+
+    // Create query string
+    let queryStr = JSON.stringify(reqQuery)
+
+    // Create operators ($gt, $gte, etc)
+    queryStr = queryStr.replace(
+        /\b(gt|gte|lt|lte|in)\b/g,
+        (match) => `$${match}`
+    )
+
+    // Finding resource
+    query = Bootcamp.find(JSON.parse(queryStr))
+
+    // Select Fields
+    if (req.query.select) {
+        const fields = req.query.select.split(',').join(' ')
+        query = query.select(fields)
+    }
+
+    if (req.query.sort) {
+        const sortBy = req.query.sort.split(',').join(' ')
+        query = query.sort(sortBy)
+    } else {
+        query = query.sort('-createAt')
+    }
+
+    // Execute Query
+    const bootcamps = await query
     res.status(200).json({
         success: true,
         count: bootcamps.length,
@@ -87,4 +124,20 @@ export const getBootcampsInRadius = asyncHandler(async (req, res, _next) => {
     const { zipcode, distance } = req.params
 
     // Get lat/lng from geocoder
+    let loc = await geocoder.geocode(zipcode)
+    loc = loc[0]
+    const lat = loc.latitude
+    const lng = loc.longitude
+
+    // calculate radius
+    const radius = distance / 3963 // miles
+
+    const bootcamps = await Bootcamp.find({
+        location: { $geoWithin: { $centerSphere: [[lng, lat], radius] } }
+    })
+    res.status(200).json({
+        success: true,
+        count: bootcamps.length,
+        data: bootcamps
+    })
 })
