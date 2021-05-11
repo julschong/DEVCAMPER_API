@@ -14,7 +14,7 @@ export const getAll = asyncHandler(async (req, res, _next) => {
     const reqQuery = { ...req.query }
 
     // Fields to exclude
-    const removeFields = ['select', 'sort']
+    const removeFields = ['select', 'sort', 'limit', 'page']
 
     // Loop over removeFields to remove field from reqQuery
     removeFields.forEach((param) => delete reqQuery[param])
@@ -37,12 +37,20 @@ export const getAll = asyncHandler(async (req, res, _next) => {
         query = query.select(fields)
     }
 
+    // Set Sort Fields
     if (req.query.sort) {
         const sortBy = req.query.sort.split(',').join(' ')
         query = query.sort(sortBy)
     } else {
-        query = query.sort('-createAt')
+        query = query.sort('name')
     }
+
+    // Pagination
+    const page = parseInt(req.query.page, 10) || 1
+    const limit = parseInt(req.query.limit, 10) || 100
+    const skip = (page - 1) * limit
+
+    query = query.skip(skip).limit(limit)
 
     // Execute Query
     const bootcamps = await query
