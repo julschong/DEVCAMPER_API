@@ -1,4 +1,4 @@
-import express from 'express'
+import express from 'express';
 import {
     getAll,
     getOne,
@@ -6,19 +6,26 @@ import {
     updateOne,
     deleteOne,
     getBootcampsInRadius
-} from '../controllers/bootcamp.controller.js'
-const bootcampRoute = express.Router()
+} from '../controllers/bootcamp.controller.js';
 
-bootcampRoute.get('/radius/:zipcode/:distance', getBootcampsInRadius)
+// Include other resource routers
+import courseRouter from './courses.route.js';
 
-bootcampRoute.get('/', getAll)
+const bootcampRoute = express.Router();
 
-bootcampRoute.post('/', createOne)
+// Re-route into other resource router
+bootcampRoute.use('/:bootcampId/courses', courseRouter);
 
-bootcampRoute.get('/:id', getOne)
+bootcampRoute.get('/radius/:zipcode/:distance', getBootcampsInRadius);
 
-bootcampRoute.put('/:id', updateOne)
+bootcampRoute.get('/', getAll);
 
-bootcampRoute.delete('/:id', deleteOne)
+bootcampRoute.post('/', createOne);
 
-export default bootcampRoute
+bootcampRoute.get('/:id', getOne);
+
+bootcampRoute.put('/:id', updateOne);
+
+bootcampRoute.delete('/:id', deleteOne);
+
+export default bootcampRoute;
