@@ -1,6 +1,6 @@
-import mongoose from 'mongoose'
-import slugify from 'slugify'
-import geocoder from '../utils/geocoder.js'
+import mongoose from 'mongoose';
+import slugify from 'slugify';
+import geocoder from '../utils/geocoder.js';
 
 const BootcampSchema = new mongoose.Schema(
     {
@@ -96,20 +96,37 @@ const BootcampSchema = new mongoose.Schema(
         }
     },
     {
-        timestamps: true
+        timestamps: true,
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true }
     }
-)
+);
+
+// Cascade delete courses when a bootcamp is deleted
+BootcampSchema.pre('remove', async function (next) {
+    console.log('Courses being removed from bootcamp', this._id);
+    await this.model('Course').deleteMany({ bootcamp: this._id });
+    next();
+});
+
+// Reverse populate with virtuals
+BootcampSchema.virtual('courses', {
+    ref: 'Course',
+    localField: '_id',
+    foreignField: 'bootcamp',
+    justOne: false
+});
 
 // Create bootcamp slug from the name
 BootcampSchema.pre('save', function (next) {
-    this.slug = slugify(this.name, { lower: true })
-    next()
-})
+    this.slug = slugify(this.name, { lower: true });
+    next();
+});
 
 // Geocode and create location field
 BootcampSchema.pre('save', async function (next) {
-    let loc = await geocoder.geocode(this.address)
-    loc = loc[0]
+    let loc = await geocoder.geocode(this.address);
+    loc = loc[0];
 
     this.location = {
         type: 'Point',
@@ -120,13 +137,13 @@ BootcampSchema.pre('save', async function (next) {
         state: loc.administrativeLevels.level1short,
         zipcode: loc.zipcode,
         country: loc.countryCode
-    }
+    };
 
     // Do not save address in DB
-    this.address = undefined
-    next()
-})
+    this.address = undefined;
+    next();
+});
 
-const Bootcamp = mongoose.model('Bootcamp', BootcampSchema)
+const Bootcamp = mongoose.model('Bootcamp', BootcampSchema);
 
-export default Bootcamp
+export default Bootcamp;
