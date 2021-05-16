@@ -3,8 +3,10 @@ dotenv.config({ path: './config/.env' });
 
 import colors from 'colors';
 import express from 'express';
-
 import morgan from 'morgan';
+import fileupload from 'express-fileupload';
+
+import authRoute from './routes/auth.route.js';
 import bootcampRoute from './routes/bootcamps.route.js';
 import courseRoute from './routes/courses.route.js';
 import connectDB from './config/db.js';
@@ -22,9 +24,18 @@ if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
 
+// File upload
+app.use(fileupload());
+
+// Use static page
+app.use(express.static('./public'));
+
+// Route files
+app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/bootcamps', bootcampRoute);
 app.use('/api/v1/courses', courseRoute);
 
+// Error Handler Middleware
 app.use(errorHander);
 
 const PORT = process.env.PORT || 5000;
