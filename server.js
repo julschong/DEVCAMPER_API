@@ -5,6 +5,7 @@ import colors from 'colors';
 import express from 'express';
 import morgan from 'morgan';
 import fileupload from 'express-fileupload';
+import cookieParser from 'cookie-parser';
 
 import authRoute from './routes/auth.route.js';
 import bootcampRoute from './routes/bootcamps.route.js';
@@ -19,6 +20,9 @@ const app = express();
 
 // Body parser
 app.use(express.json());
+
+// Cookie parser
+app.use(cookieParser());
 
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
